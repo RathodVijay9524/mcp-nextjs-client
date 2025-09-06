@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { ChatSession, Message, LLMConfig, MCPServerConfig, AppConfig } from '@/types';
 import { LLMManager } from '@/lib/llm/providers';
 import { MCPClientManager } from '@/lib/mcp/browser-client';
+import { BridgeMCPClient } from '@/lib/mcp/bridge-client';
 import { MemoryManager } from '@/lib/memory/storage';
 
 interface AppState {
@@ -21,8 +22,10 @@ interface AppState {
   
   // MCP State
   mcpClientManager: MCPClientManager;
+  bridgeClient: BridgeMCPClient;
   mcpServers: MCPServerConfig[];
   availableTools: string[];
+  bridgeConnected: boolean;
   
   // Actions
   setConfig: (config: AppConfig) => void;
@@ -43,6 +46,7 @@ interface AppState {
   removeMCPServer: (serverId: string) => Promise<void>;
   toggleMCPServer: (serverId: string) => Promise<void>;
   refreshMCPTools: () => Promise<void>;
+  checkBridgeConnection: () => Promise<void>;
   
   // UI Actions
   setLoading: (loading: boolean) => void;
@@ -61,20 +65,27 @@ export const useAppStore = create<AppState>()(
       llmManager: new LLMManager(),
       isLLMConfigured: false,
       mcpClientManager: new MCPClientManager(),
+      bridgeClient: new BridgeMCPClient(),
+      bridgeConnected: false,
       mcpServers: [
         {
           id: 'demo-server-1',
           name: 'File System Tools',
+          transport: 'stdio',
           command: 'python',
           args: ['/path/to/filesystem-mcp.py'],
-          isConnected: true
+          description: 'Local file operations and analysis',
+          isConnected: true,
+          capabilities: ['file_read', 'file_write', 'dir_list']
         },
         {
           id: 'demo-server-2', 
           name: 'Web & API Tools',
-          command: 'python',
-          args: ['/path/to/web-mcp.py'],
-          isConnected: false
+          transport: 'sse',
+          url: 'http://localhost:8080/mcp/events',
+          description: 'Web scraping and API interactions',
+          isConnected: false,
+          capabilities: ['web_scrape', 'api_call', 'http_request']
         }
       ],
       availableTools: [
@@ -157,6 +168,11 @@ export const useAppStore = create<AppState>()(
         const memoryManager = MemoryManager.getInstance();
         const sessions = memoryManager.getAllSessions();
         set({ sessions });
+        
+        // Check bridge connection on app load
+        setTimeout(() => {
+          get().checkBridgeConnection();
+        }, 1000); // Small delay to ensure app is ready
       },
       
       // Message Actions
@@ -272,19 +288,43 @@ Remember: Your power comes from using MCP tools to provide real, accurate, and d
             }
           }
           
-          // Generate response from LLM
-          const assistantResponse = await llmManager.generateResponse(
-            contextMessages,
-            systemPrompt || undefined
-          );
-          
-          // Add assistant message
-          memoryManager.addMessage(activeSession.id, {
-            role: 'assistant',
-            content: assistantResponse,
-            provider: llmManager.getCurrentConfig()?.provider,
-            model: llmManager.getCurrentConfig()?.model
-          });
+          // Special handling: detect project analysis command
+          const projectMatch = content.match(/^\s*Analyze\s+this\s+project:\s*(.+)$/i);
+          if (projectMatch) {
+            const projectPath = projectMatch[1].trim();
+            const { bridgeClient, bridgeConnected } = get();
+
+            // Ensure bridge connection state is updated
+            if (!bridgeConnected) {
+              await get().checkBridgeConnection();
+            }
+
+            // Call bridge to analyze project (falls back to demo if not connected)
+            const analysis = await bridgeClient.analyzeProject(projectPath);
+
+            const response = `**🔍 Project Analysis**\n\n**📁 Path:** ${projectPath}\n\n**📊 Summary:**\n• Type: ${analysis.type}\n• Language: ${analysis.language}\n• Framework: ${analysis.framework || 'N/A'}\n\n**🗂️ Structure (sample):**\n${Object.keys(analysis.structure).slice(0, 8).map(k => `• ${k}`).join('\n')}\n\n**📦 Dependencies (sample):**\n${Object.keys(analysis.dependencies || {}).slice(0, 10).map(k => `• ${k}`).join('\n') || '• None detected'}\n\n**💡 Insights:**\n${(analysis.insights || []).slice(0, 5).map(i => `• ${i}`).join('\n') || '• No specific insights'}\n\n${analysis.note ? `> ${analysis.note}` : ''}`;
+
+            memoryManager.addMessage(activeSession.id, {
+              role: 'assistant',
+              content: response,
+              provider: llmManager.getCurrentConfig()?.provider,
+              model: llmManager.getCurrentConfig()?.model
+            });
+          } else {
+            // Generate response from LLM
+            const assistantResponse = await llmManager.generateResponse(
+              contextMessages,
+              systemPrompt || undefined
+            );
+            
+            // Add assistant message
+            memoryManager.addMessage(activeSession.id, {
+              role: 'assistant',
+              content: assistantResponse,
+              provider: llmManager.getCurrentConfig()?.provider,
+              model: llmManager.getCurrentConfig()?.model
+            });
+          }
           
           // Update session in state
           const updatedSession = memoryManager.getSession(activeSession.id);
@@ -414,6 +454,21 @@ Remember: Your power comes from using MCP tools to provide real, accurate, and d
         } catch (error) {
           console.error('Failed to refresh MCP tools:', error);
           set({ availableTools: [] });
+        }
+      },
+      
+      // Bridge Actions
+      checkBridgeConnection: async () => {
+        const { bridgeClient } = get();
+        try {
+          const connected = await bridgeClient.checkConnection();
+          set({ bridgeConnected: connected });
+          if (connected) {
+            console.log('🌉 Bridge connection established');
+          }
+        } catch (error) {
+          console.log('Bridge connection failed, using demo mode');
+          set({ bridgeConnected: false });
         }
       },
       

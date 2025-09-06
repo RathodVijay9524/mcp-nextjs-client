@@ -1,7 +1,7 @@
 # 🚀 MCP Next.js Client - Deployment Guide
 
 ## Live Demo
-🔗 **Deployed App**: [Coming Soon]
+🔗 **Deployed App**: https://mcp-nextjs-client-xxx.vercel.app (Your actual URL here)
 
 ## 🎯 Features
 - ✅ 42+ MCP Tools Integration

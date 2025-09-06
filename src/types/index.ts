@@ -32,13 +32,27 @@ export interface LLMConfig {
   baseUrl?: string;
 }
 
+export type MCPTransportType = 'stdio' | 'sse' | 'websocket';
+
 export interface MCPServerConfig {
   id: string;
   name: string;
-  command: string;
-  args: string[];
+  transport: MCPTransportType;
+  
+  // Stdio transport fields
+  command?: string;
+  args?: string[];
   env?: Record<string, string>;
+  
+  // SSE/WebSocket transport fields
+  url?: string;
+  headers?: Record<string, string>;
+  
+  // Common fields
+  description?: string;
+  version?: string;
   isConnected: boolean;
+  capabilities?: string[];
 }
 
 export interface MCPTool {

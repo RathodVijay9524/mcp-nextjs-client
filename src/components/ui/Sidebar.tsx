@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useAppStore } from '@/store';
-import { ChatSession } from '@/types';
+import { MCPServerConfig, ChatSession } from '@/types';
+import MCPServerDialog from './MCPServerDialog';
 import { 
   MessageSquare, 
   Plus, 
@@ -124,12 +125,15 @@ const Sidebar: React.FC<SidebarProps> = ({
     mcpServers,
     availableTools,
     toggleMCPServer,
-    refreshMCPTools
+    refreshMCPTools,
+    addMCPServer
   } = useAppStore();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [showRecent, setShowRecent] = useState(true);
   const [showOlder, setShowOlder] = useState(false);
+  const [showMCPDialog, setShowMCPDialog] = useState(false);
+  const [editingMCPServer, setEditingMCPServer] = useState<MCPServerConfig | null>(null);
   
   const colors = themes[theme];
 
@@ -242,38 +246,85 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
           
           {/* MCP Servers Control */}
-          {mcpServers.length > 0 && (
-            <div className="mb-4">
-              <div className="text-sm font-medium mb-2" style={{ color: colors.text }}>
-                MCP Servers ({mcpServers.filter(s => s.isConnected).length}/{mcpServers.length})
-              </div>
-              <div className="space-y-2">
-                {mcpServers.map((server) => (
-                  <div key={server.id} className="flex items-center justify-between p-2 rounded-lg" 
-                       style={{ backgroundColor: `${colors.bubble}30`, border: `1px solid ${colors.border}` }}>
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                        server.isConnected ? 'bg-green-500' : 'bg-red-500'
-                      }`} />
-                      <span className="text-sm truncate" style={{ color: colors.text }}>
-                        {server.name}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => toggleMCPServer(server.id)}
-                      className={`px-2 py-1 text-xs rounded transition-colors ${
-                        server.isConnected 
-                          ? 'bg-green-500 hover:bg-green-600 text-white' 
-                          : 'bg-gray-600 hover:bg-gray-500 text-gray-200'
-                      }`}
-                    >
-                      {server.isConnected ? 'ON' : 'OFF'}
-                    </button>
-                  </div>
-                ))}
-              </div>
+          <div className="mb-4">
+            <div className="flex items-center justify-between text-sm font-medium mb-2" style={{ color: colors.text }}>
+              <span>MCP Servers ({mcpServers.filter(s => s.isConnected).length}/{mcpServers.length})</span>
+              <button
+                onClick={() => setShowMCPDialog(true)}
+                className="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                title="Add MCP Server"
+              >
+                + Add
+              </button>
             </div>
-          )}
+            {mcpServers.length > 0 ? (
+              <div className="space-y-2">
+                {mcpServers.map((server) => {
+                  const transportIcon = server.transport === 'stdio' ? '📟' : 
+                                       server.transport === 'sse' ? '🌐' : 
+                                       server.transport === 'websocket' ? '🔌' : '❓';
+                  
+                  return (
+                    <div key={server.id} className="p-2 rounded-lg" 
+                         style={{ backgroundColor: `${colors.bubble}30`, border: `1px solid ${colors.border}` }}>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                            server.isConnected ? 'bg-green-500' : 'bg-red-500'
+                          }`} />
+                          <span className="text-sm font-medium truncate" style={{ color: colors.text }}>
+                            {server.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => {
+                              setEditingMCPServer(server);
+                              setShowMCPDialog(true);
+                            }}
+                            className="p-1 hover:bg-gray-600 rounded transition-colors text-xs"
+                            title="Edit server"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => toggleMCPServer(server.id)}
+                            className={`px-2 py-1 text-xs rounded transition-colors ${
+                              server.isConnected 
+                                ? 'bg-green-500 hover:bg-green-600 text-white' 
+                                : 'bg-gray-600 hover:bg-gray-500 text-gray-200'
+                            }`}
+                          >
+                            {server.isConnected ? 'ON' : 'OFF'}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between text-xs" style={{ color: `${colors.text}70`, opacity: 0.7 }}>
+                        <span className="flex items-center gap-1">
+                          {transportIcon} {server.transport.toUpperCase()}
+                        </span>
+                        {server.description && (
+                          <span className="truncate max-w-[120px]" title={server.description}>
+                            {server.description}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="p-3 text-center text-sm rounded-lg" style={{ 
+                backgroundColor: `${colors.bubble}20`, 
+                color: `${colors.text}70`, 
+                border: `1px dashed ${colors.border}` 
+              }}>
+                <div className="mb-2">🔧</div>
+                <div>No MCP servers configured</div>
+                <div className="text-xs mt-1">Click "+ Add" to get started</div>
+              </div>
+            )}
+          </div>
 
           {/* Sessions List */}
           <div className={`flex-1 overflow-y-auto scrollbar-thin ${
@@ -391,6 +442,26 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
       </div>
+
+      {/* MCP Server Dialog */}
+      <MCPServerDialog
+        isOpen={showMCPDialog}
+        onClose={() => {
+          setShowMCPDialog(false);
+          setEditingMCPServer(null);
+        }}
+        onSave={async (config) => {
+          try {
+            await addMCPServer(config);
+            setShowMCPDialog(false);
+            setEditingMCPServer(null);
+          } catch (error) {
+            console.error('Failed to add MCP server:', error);
+            alert(`Failed to add server: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          }
+        }}
+        editingServer={editingMCPServer}
+      />
     </aside>
   );
 };
