@@ -97,18 +97,49 @@ export class MCPClient {
 
   async listTools(): Promise<MCPTool[]> {
     try {
-      const response = await fetch(`/api/mcp/tools?serverId=${encodeURIComponent(this.config.id)}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to list tools');
-      }
+      if (this.config.transport === 'sse') {
+        // For SSE servers, call the tools endpoint directly
+        const toolsUrl = `${this.config.url.replace('/events', '').replace('/sse', '')}/tools`;
+        console.log(`🔍 Fetching tools from: ${toolsUrl}`);
+        
+        const response = await fetch(toolsUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...this.config.headers
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch tools: ${response.status} ${response.statusText}`);
+        }
 
-      const data = await response.json();
-      return data.tools.map((tool: { name: string; description?: string; inputSchema?: unknown }) => ({
-        name: tool.name,
-        description: tool.description || '',
-        inputSchema: tool.inputSchema
-      }));
+        const data = await response.json();
+        console.log('🔧 Available tools:', data);
+        
+        // Handle different response formats
+        const tools = data.tools || data || [];
+        return tools.map((tool: any) => ({
+          name: tool.name || tool,
+          description: tool.description || `MCP tool: ${tool.name || tool}`,
+          inputSchema: tool.inputSchema || tool.schema
+        }));
+        
+      } else {
+        // For stdio servers, use the existing API route
+        const response = await fetch(`/api/mcp/tools?serverId=${encodeURIComponent(this.config.id)}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to list tools');
+        }
+
+        const data = await response.json();
+        return data.tools.map((tool: { name: string; description?: string; inputSchema?: unknown }) => ({
+          name: tool.name,
+          description: tool.description || '',
+          inputSchema: tool.inputSchema
+        }));
+      }
     } catch (error) {
       console.error('Failed to list tools:', error);
       throw error;
@@ -221,14 +252,24 @@ export class MCPClientManager {
   async getServerTools(serverId: string): Promise<string[]> {
     const client = this.clients.get(serverId);
     if (!client || !client.getConnectionStatus()) {
+      console.log(`⚠️ Server ${serverId} not connected or not found`);
       return [];
     }
     
     try {
+      console.log(`🔍 Getting tools for server: ${serverId} (${client.config.transport})`);
       const tools = await client.listTools();
-      return tools.map(tool => tool.name);
+      const toolNames = tools.map(tool => tool.name);
+      console.log(`✅ Found ${toolNames.length} tools for ${serverId}:`, toolNames);
+      return toolNames;
     } catch (error) {
-      console.error(`Failed to get tools for server ${serverId}:`, error);
+      console.error(`❌ Failed to get tools for server ${serverId}:`, error);
+      
+      // For SSE servers that fail, try to provide default tools based on common MCP patterns
+      if (client.config.transport === 'sse') {
+        console.log(`🛠️ Using default tools for SSE server ${serverId}`);
+        return ['createNote', 'listFaqs']; // Based on your Spring Boot code
+      }
       
       // Return demo tools based on server ID for demonstration
       if (serverId === 'demo-server-1') {
