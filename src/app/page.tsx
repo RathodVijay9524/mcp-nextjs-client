@@ -42,6 +42,19 @@ export default function Home() {
     if (saved && saved in themes) {
       setTheme(saved as 'dark' | 'green' | 'light');
     }
+    
+    // Set initial sidebar state based on screen size
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 1024; // lg breakpoint
+      setSidebarCollapsed(isMobile);
+    };
+    
+    // Set initial state
+    handleResize();
+    
+    // Listen for resize events
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
@@ -68,6 +81,14 @@ export default function Home() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden" style={{ background: colors.main, color: colors.text }}>
+      {/* Mobile overlay */}
+      {!sidebarCollapsed && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={handleToggleSidebar}
+        />
+      )}
+      
       <Sidebar 
         theme={theme}
         sidebarCollapsed={sidebarCollapsed}
@@ -80,6 +101,7 @@ export default function Home() {
           theme={theme}
           onThemeChange={handleThemeChange}
           onOpenSettings={handleOpenSettings}
+          onToggleSidebar={handleToggleSidebar}
         />
       </div>
 

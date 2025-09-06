@@ -141,7 +141,7 @@ const LLMConfigurationSection: React.FC<{ colors?: Colors }> = ({ colors }) => {
         <label className="block text-sm font-medium mb-2" style={{ color: colors?.text || '#000000' }}>
           API Key
         </label>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <div className="flex-1 relative">
             <input
               type="password"
@@ -165,7 +165,7 @@ const LLMConfigurationSection: React.FC<{ colors?: Colors }> = ({ colors }) => {
           <button
             onClick={testApiKey}
             disabled={!llmConfig.apiKey.trim() || isTestingKey}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto min-h-[44px]"
           >
             {isTestingKey ? 'Testing...' : 'Test'}
           </button>
@@ -179,7 +179,7 @@ const LLMConfigurationSection: React.FC<{ colors?: Colors }> = ({ colors }) => {
       </div>
 
       {/* Advanced Settings */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Temperature
@@ -221,7 +221,7 @@ const LLMConfigurationSection: React.FC<{ colors?: Colors }> = ({ colors }) => {
         <button
           onClick={handleSave}
           disabled={!llmConfig.apiKey.trim()}
-          className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto min-h-[44px]"
         >
           Save Configuration
         </button>
@@ -419,13 +419,13 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
       <div 
-        className="rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden"
+        className="rounded-lg w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden"
         style={{ backgroundColor: colors.main }}
       >
         <div 
-          className="flex items-center justify-between p-6"
+          className="flex items-center justify-between p-4 sm:p-6"
           style={{ borderBottom: `1px solid ${colors.border}` }}
         >
           <h2 className="text-xl font-semibold" style={{ color: colors.text }}>Configuration</h2>
@@ -438,10 +438,10 @@ const ConfigurationDialog: React.FC<ConfigurationDialogProps> = ({
           </button>
         </div>
         
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-          <div className="space-y-8">
+        <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(95vh-120px)] sm:max-h-[calc(90vh-120px)]">
+          <div className="space-y-6 sm:space-y-8">
             <LLMConfigurationSection colors={colors} />
-            <div style={{ borderTop: `1px solid ${colors.border}` }} className="pt-8">
+            <div style={{ borderTop: `1px solid ${colors.border}` }} className="pt-6 sm:pt-8">
               <MCPServerSection colors={colors} />
             </div>
           </div>

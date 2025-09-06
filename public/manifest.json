@@ -1,0 +1,42 @@
+{
+  "name": "MCP Next.js Client",
+  "short_name": "MCP Client",
+  "description": "A beautiful web client for Model Context Protocol with multi-LLM support",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1c",
+  "theme_color": "#0a0f1c",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512x512.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "en",
+  "screenshots": [
+    {
+      "src": "/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "MCP Client Desktop View"
+    },
+    {
+      "src": "/screenshot-narrow.png", 
+      "sizes": "480x854",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "MCP Client Mobile View"
+    }
+  ]
+}

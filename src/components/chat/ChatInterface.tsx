@@ -44,6 +44,7 @@ interface ChatInterfaceProps {
   theme?: 'dark' | 'green' | 'light';
   onThemeChange?: (theme: 'dark' | 'green' | 'light') => void;
   onOpenSettings?: () => void;
+  onToggleSidebar?: () => void;
 }
 
 const formatMessageContent = (content: string, isUser: boolean): JSX.Element => {
@@ -248,22 +249,22 @@ const MessageBubble: React.FC<{ message: Message; colors: Colors }> = ({ message
   const isUser = message.role === 'user';
   
   return (
-    <div className={`flex items-start space-x-3 ${
+    <div className={`flex items-start space-x-2 sm:space-x-3 ${
       isUser ? 'justify-end space-x-reverse' : 'justify-start'
     }`}>
-      <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full overflow-hidden flex-shrink-0">
         <img
           src={isUser ? "https://i.pravatar.cc/40?img=3" : "https://i.pravatar.cc/40?img=5"}
           alt={isUser ? "You" : "AI Assistant"}
           className="w-full h-full object-cover rounded-full"
         />
       </div>
-      <div className="flex flex-col max-w-xl">
+      <div className="flex flex-col max-w-[280px] sm:max-w-xl">
         <span className="text-xs opacity-60 mb-1" style={{ color: colors.text }}>
           {isUser ? "You" : "AI Assistant"}
         </span>
         <div
-          className={`px-4 py-3 rounded-2xl shadow-md ${
+          className={`px-3 sm:px-4 py-2 sm:py-3 rounded-2xl shadow-md text-sm sm:text-base ${
             isUser
               ? "bg-green-500 text-black rounded-br-sm"
               : "rounded-bl-sm"
@@ -316,10 +317,10 @@ const ChatInput: React.FC<{ colors: Colors }> = ({ colors }) => {
   };
   
   return (
-    <div className="p-4" style={{ background: colors.main, borderTop: `1px solid ${colors.border}` }}>
+    <div className="p-3 sm:p-4" style={{ background: colors.main, borderTop: `1px solid ${colors.border}` }}>
       <div className="max-w-3xl mx-auto w-full">
         {availableTools.length > 0 && (
-          <div className="flex items-center justify-between mb-3 p-2 rounded-lg" style={{ backgroundColor: `${colors.bubble}40`, border: `1px solid ${colors.border}` }}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3 p-2 rounded-lg" style={{ backgroundColor: `${colors.bubble}40`, border: `1px solid ${colors.border}` }}>
             <label className="flex items-center gap-3 text-sm cursor-pointer" style={{ color: colors.text }}>
               <input
                 type="checkbox"
@@ -336,9 +337,9 @@ const ChatInput: React.FC<{ colors: Colors }> = ({ colors }) => {
           </div>
         )}
         
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           <div
-            className="flex items-center border rounded-full px-4 py-2 flex-1"
+            className="flex items-center border rounded-full px-3 sm:px-4 py-2 flex-1 min-h-[48px]"
             style={{ background: colors.input, borderColor: colors.border }}
           >
             <span className="text-gray-400 mr-2">🔍</span>
@@ -358,22 +359,24 @@ const ChatInput: React.FC<{ colors: Colors }> = ({ colors }) => {
               style={{ color: colors.text }}
               disabled={isLoading}
             />
-            <button
-              type="button"
-              onClick={() => setIsRecording(!isRecording)}
-              className={`ml-2 w-10 h-10 flex items-center justify-center rounded-full ${
-                isRecording ? "bg-red-600 text-white mic-pulse" : "bg-gray-700 text-white"
-              }`}
-            >
-              🎤
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={isLoading || !input.trim()}
-              className="ml-2 w-10 h-10 flex items-center justify-center bg-green-500 text-black rounded-full hover:bg-green-600 disabled:opacity-50"
-            >
-              ➤
-            </button>
+            <div className="flex gap-2 ml-2">
+              <button
+                type="button"
+                onClick={() => setIsRecording(!isRecording)}
+                className={`w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center rounded-full text-sm sm:text-base ${
+                  isRecording ? "bg-red-600 text-white mic-pulse" : "bg-gray-700 text-white"
+                }`}
+              >
+                🎤
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={isLoading || !input.trim()}
+                className="w-10 h-10 sm:w-10 sm:h-10 flex items-center justify-center bg-green-500 text-black rounded-full hover:bg-green-600 disabled:opacity-50 text-sm sm:text-base"
+              >
+                ➤
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -411,7 +414,7 @@ const ChatMessages: React.FC<{ colors: Colors; theme?: string }> = ({ colors, th
                         'scrollbar-thin';
   
   return (
-    <div className={`flex-1 overflow-y-auto p-6 ${scrollbarClass}`} style={{ background: colors.main }}>
+    <div className={`flex-1 overflow-y-auto p-3 sm:p-6 ${scrollbarClass}`} style={{ background: colors.main }}>
       <div className="max-w-3xl mx-auto space-y-4">
         {currentSession.messages.length === 0 ? (
           <div className="flex items-center justify-center h-full min-h-[500px]">
@@ -424,7 +427,7 @@ const ChatMessages: React.FC<{ colors: Colors; theme?: string }> = ({ colors, th
                 Enhanced with <span className="text-green-400 font-semibold">42+ MCP tools</span> for intelligent project analysis and real-time operations!
               </p>
               
-              <div className="mb-4 text-left max-w-lg">
+              <div className="mb-4 text-left max-w-full sm:max-w-lg">
                 <div className="text-sm" style={{ color: colors.text, opacity: 0.9 }}>
                   <p className="mb-3 font-bold text-blue-300 flex items-center gap-2">
                     <span>🎯</span>What I Can Do For You:
@@ -511,11 +514,12 @@ const ChatMessages: React.FC<{ colors: Colors; theme?: string }> = ({ colors, th
   );
 };
 
-const ChatHeader: React.FC<{ colors: Colors; theme: string; onThemeChange: (theme: 'dark' | 'green' | 'light') => void; onOpenSettings?: () => void }> = ({ 
+const ChatHeader: React.FC<{ colors: Colors; theme: string; onThemeChange: (theme: 'dark' | 'green' | 'light') => void; onOpenSettings?: () => void; onToggleSidebar?: () => void }> = ({ 
   colors, 
   theme, 
   onThemeChange, 
-  onOpenSettings 
+  onOpenSettings,
+  onToggleSidebar
 }) => {
   const { availableTools, mcpServers } = useAppStore();
   
@@ -524,7 +528,20 @@ const ChatHeader: React.FC<{ colors: Colors; theme: string; onThemeChange: (them
       className="flex justify-between items-center px-6 py-3"
       style={{ background: colors.main, borderBottom: `1px solid ${colors.border}` }}
     >
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2 sm:space-x-3">
+        {/* Mobile hamburger menu */}
+        <button
+          onClick={onToggleSidebar}
+          className="lg:hidden p-2 rounded-md hover:bg-gray-700 transition-colors"
+          aria-label="Toggle sidebar"
+        >
+          <div className="w-6 h-6 flex flex-col justify-center items-center space-y-1">
+            <span className="block w-5 h-0.5 bg-gray-300"></span>
+            <span className="block w-5 h-0.5 bg-gray-300"></span>
+            <span className="block w-5 h-0.5 bg-gray-300"></span>
+          </div>
+        </button>
+        
         <div className="relative">
           <img
             src="https://i.pravatar.cc/40?img=5"
@@ -534,14 +551,14 @@ const ChatHeader: React.FC<{ colors: Colors; theme: string; onThemeChange: (them
           <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-black"></span>
         </div>
         <div>
-          <h1 className="text-lg font-bold" style={{ color: colors.text }}>Chat Interface</h1>
-          <div className="flex items-center gap-4 text-xs" style={{ color: colors.text, opacity: 0.7 }}>
+          <h1 className="text-base sm:text-lg font-bold" style={{ color: colors.text }}>Chat Interface</h1>
+          <div className="flex items-center gap-2 sm:gap-4 text-xs" style={{ color: colors.text, opacity: 0.7 }}>
             <span>{mcpServers.length} MCP servers</span>
             <span>{availableTools.length} tools available</span>
           </div>
         </div>
       </div>
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2 sm:space-x-3">
         <button
           onClick={() => {
             const next = theme === "dark" ? "green" : theme === "green" ? "light" : "dark";
@@ -562,7 +579,8 @@ const ChatHeader: React.FC<{ colors: Colors; theme: string; onThemeChange: (them
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
   theme = 'dark', 
   onThemeChange = () => {},
-  onOpenSettings = () => {}
+  onOpenSettings = () => {},
+  onToggleSidebar = () => {}
 }) => {
   const { error, setError } = useAppStore();
   const colors = themes[theme];
@@ -575,6 +593,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           theme={theme} 
           onThemeChange={onThemeChange}
           onOpenSettings={onOpenSettings}
+          onToggleSidebar={onToggleSidebar}
         />
         
         {error && (

@@ -95,3 +95,77 @@ body {
 .scrollbar-light::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* Mobile-specific styles */
+@media (max-width: 640px) {
+  /* Ensure proper touch targets */
+  button, input, textarea, select {
+    min-height: 44px;
+  }
+  
+  /* Improve text readability on mobile */
+  body {
+    font-size: 16px; /* Prevents zoom on input focus on iOS */
+  }
+  
+  /* Better spacing for mobile */
+  .mobile-spacing {
+    padding: 0.75rem;
+  }
+  
+  /* Hide scrollbars on mobile for cleaner look */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Improved focus styles for accessibility */
+*:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Better tap targets */
+@media (hover: none) and (pointer: coarse) {
+  button, .clickable {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Prevent zoom on input focus (iOS) */
+input[type="text"], 
+input[type="email"], 
+input[type="password"], 
+input[type="url"], 
+textarea, 
+select {
+  font-size: 16px;
+}
+
+/* Loading animation improvements */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Better mobile viewport handling */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific styles */
+  body {
+    -webkit-text-size-adjust: 100%;
+  }
+}

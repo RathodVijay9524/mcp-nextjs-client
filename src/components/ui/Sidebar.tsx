@@ -175,7 +175,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside
-      className={`${sidebarCollapsed ? "w-16" : "w-80"} flex flex-col p-4 transition-all duration-300 h-full flex-shrink-0`}
+      className={`${sidebarCollapsed ? "w-16 lg:w-16" : "w-80"} flex flex-col p-4 transition-all duration-300 h-full flex-shrink-0 
+        ${sidebarCollapsed ? "-translate-x-full lg:translate-x-0" : "translate-x-0"} 
+        fixed lg:relative z-50 lg:z-auto`}
       style={{ background: colors.sidebar, borderRight: `1px solid ${colors.border}` }}
     >
       <div className="flex items-center justify-between mb-6">
