@@ -42,6 +42,8 @@ export class MCPClient {
           throw new Error('SSE URL is required');
         }
         
+        console.log(`🔍 Testing SSE connection to: ${this.config.url}`);
+        
         // Test SSE endpoint availability
         try {
           const response = await fetch(this.config.url, {
@@ -52,11 +54,13 @@ export class MCPClient {
             }
           });
           
+          console.log(`📡 SSE endpoint response: ${response.status} ${response.statusText}`);
+          
           if (!response.ok && response.status !== 405) { // 405 Method Not Allowed is okay for HEAD requests
             throw new Error(`SSE endpoint unavailable: ${response.status}`);
           }
         } catch (fetchError) {
-          console.warn('SSE endpoint test failed, proceeding with connection attempt:', fetchError);
+          console.warn('⚠️ SSE endpoint test failed, proceeding with connection attempt:', fetchError);
           // Continue anyway as some servers might not support HEAD requests
         }
       } else if (this.config.transport === 'websocket') {
@@ -113,27 +117,55 @@ export class MCPClient {
 
   async callTool(name: string, arguments_: Record<string, unknown>): Promise<unknown> {
     try {
-      const response = await fetch('/api/mcp/tools', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          serverId: this.config.id,
-          toolName: name,
-          arguments: arguments_
-        })
-      });
+      console.log(`🔧 Calling MCP tool: ${name} on ${this.config.transport} server ${this.config.name}`);
+      console.log('📝 Tool arguments:', arguments_);
+      
+      if (this.config.transport === 'sse') {
+        // For SSE servers, make direct HTTP calls to tool endpoints
+        const toolUrl = `${this.config.url.replace('/events', '').replace('/sse', '')}/tools/${name}`;
+        console.log(`🎯 Tool URL: ${toolUrl}`);
+        
+        const response = await fetch(toolUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...this.config.headers
+          },
+          body: JSON.stringify(arguments_)
+        });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to call tool');
+        if (!response.ok) {
+          throw new Error(`Tool call failed: ${response.status} ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ Tool result:', result);
+        return result;
+        
+      } else {
+        // For stdio servers, use the existing API route
+        const response = await fetch('/api/mcp/tools', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            serverId: this.config.id,
+            toolName: name,
+            arguments: arguments_
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to call tool');
+        }
+
+        const data = await response.json();
+        return data.result;
       }
-
-      const data = await response.json();
-      return data.result;
     } catch (error) {
-      console.error(`Failed to call tool ${name}:`, error);
+      console.error(`❌ Failed to call tool ${name}:`, error);
       throw error;
     }
   }
