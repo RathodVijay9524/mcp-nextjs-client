@@ -365,6 +365,25 @@ Remember: Your power comes from using MCP tools to provide real, accurate, and d
       addMCPServer: async (config: MCPServerConfig) => {
         const { mcpClientManager } = get();
         
+        // Client-side validation
+        if (!config.id || !config.name) {
+          throw new Error('Server ID and name are required');
+        }
+        
+        if (config.transport === 'stdio' && !config.command) {
+          throw new Error('Command is required for stdio transport');
+        }
+        
+        if ((config.transport === 'sse' || config.transport === 'websocket') && !config.url) {
+          throw new Error('URL is required for SSE/WebSocket transport');
+        }
+        
+        // Check for duplicate server IDs
+        const existingServer = get().mcpServers.find(s => s.id === config.id);
+        if (existingServer) {
+          throw new Error(`Server with ID '${config.id}' already exists`);
+        }
+        
         try {
           set({ isLoading: true, error: null });
           await mcpClientManager.addServer(config);
