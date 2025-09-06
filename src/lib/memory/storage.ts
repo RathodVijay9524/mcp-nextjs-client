@@ -60,22 +60,22 @@ export class MemoryManager {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (!stored) return [];
 
-      const sessions = JSON.parse(stored);
-      // Convert date strings back to Date objects
-      return sessions.map((session: {
+      const parsedSessions = JSON.parse(stored) as Array<{
         id: string;
         title: string;
-        createdAt: string | Date;
-        updatedAt: string | Date;
+        createdAt: string;
+        updatedAt: string;
         messages: Array<{
           id: string;
           role: string;
           content: string;
-          timestamp: string | Date;
+          timestamp: string;
           provider?: string;
           model?: string;
         }>;
-      }) => ({
+      }>;
+      // Convert date strings back to Date objects
+      return parsedSessions.map((session) => ({
         ...session,
         createdAt: new Date(session.createdAt),
         updatedAt: new Date(session.updatedAt),
@@ -212,27 +212,29 @@ export class MemoryManager {
 
   importSessions(jsonData: string): void {
     try {
-      const importedSessions = JSON.parse(jsonData);
+      const importedSessions = JSON.parse(jsonData) as unknown;
       
       // Validate the data structure
       if (!Array.isArray(importedSessions)) {
         throw new Error('Invalid data format');
       }
 
-      const sessions = importedSessions.map((session: {
+      const typedSessions = importedSessions as Array<{
         id: string;
         title: string;
-        createdAt: string | Date;
-        updatedAt: string | Date;
+        createdAt: string;
+        updatedAt: string;
         messages: Array<{
           id: string;
           role: string;
           content: string;
-          timestamp: string | Date;
+          timestamp: string;
           provider?: string;
           model?: string;
         }>;
-      }) => ({
+      }>;
+
+      const sessions = typedSessions.map((session) => ({
         ...session,
         createdAt: new Date(session.createdAt),
         updatedAt: new Date(session.updatedAt),
