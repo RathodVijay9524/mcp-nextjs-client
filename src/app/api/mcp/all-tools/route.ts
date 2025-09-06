@@ -9,11 +9,14 @@ export async function GET() {
     
     // Flatten the tools into a single array with server information
     const flattenedTools = allTools.flatMap(({ serverId, tools }) => 
-      tools.map(tool => ({
-        ...tool,
-        serverId,
-        fullName: `${serverId}:${tool.name}`
-      }))
+      tools.map(tool => {
+        const typedTool = tool as { name: string; description?: string; inputSchema?: unknown };
+        return {
+          ...typedTool,
+          serverId,
+          fullName: `${serverId}:${typedTool.name}`
+        };
+      })
     );
 
     return NextResponse.json({ 
