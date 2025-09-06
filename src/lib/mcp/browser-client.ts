@@ -111,6 +111,7 @@ export class MCPClient {
         });
         
         if (!response.ok) {
+          console.warn(`⚠️ Failed to fetch tools from ${toolsUrl}: ${response.status} ${response.statusText}`);
           throw new Error(`Failed to fetch tools: ${response.status} ${response.statusText}`);
         }
 
@@ -268,6 +269,9 @@ export class MCPClientManager {
       // For SSE servers that fail, try to provide default tools based on common MCP patterns
       if (client.config.transport === 'sse') {
         console.log(`🛠️ Using default tools for SSE server ${serverId}`);
+        console.log(`📝 Make sure your Spring Boot server has these endpoints:`);
+        console.log(`   GET ${client.config.url}/tools - to list available tools`);
+        console.log(`   POST ${client.config.url}/tools/{toolName} - to execute tools`);
         return ['createNote', 'listFaqs']; // Based on your Spring Boot code
       }
       

@@ -260,9 +260,10 @@ const Sidebar: React.FC<SidebarProps> = ({
             {mcpServers.length > 0 ? (
               <div className="space-y-2">
                 {mcpServers.map((server) => {
-                  const transportIcon = server.transport === 'stdio' ? '📟' : 
-                                       server.transport === 'sse' ? '🌐' : 
-                                       server.transport === 'websocket' ? '🔌' : '❓';
+                  const transport = server.transport || 'unknown';
+                  const transportIcon = transport === 'stdio' ? '📟' : 
+                                       transport === 'sse' ? '🌐' : 
+                                       transport === 'websocket' ? '🔌' : '❓';
                   
                   return (
                     <div key={server.id} className="p-2 rounded-lg" 
@@ -301,7 +302,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       </div>
                       <div className="flex items-center justify-between text-xs" style={{ color: `${colors.text}70`, opacity: 0.7 }}>
                         <span className="flex items-center gap-1">
-                          {transportIcon} {server.transport.toUpperCase()}
+                          {transportIcon} {(server.transport || 'UNKNOWN').toUpperCase()}
                         </span>
                         {server.description && (
                           <span className="truncate max-w-[120px]" title={server.description}>
