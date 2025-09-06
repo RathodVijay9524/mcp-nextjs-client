@@ -62,11 +62,24 @@ export class MemoryManager {
 
       const sessions = JSON.parse(stored);
       // Convert date strings back to Date objects
-      return sessions.map((session: any) => ({
+      return sessions.map((session: {
+        id: string;
+        title: string;
+        createdAt: string | Date;
+        updatedAt: string | Date;
+        messages: Array<{
+          id: string;
+          role: string;
+          content: string;
+          timestamp: string | Date;
+          provider?: string;
+          model?: string;
+        }>;
+      }) => ({
         ...session,
         createdAt: new Date(session.createdAt),
         updatedAt: new Date(session.updatedAt),
-        messages: session.messages.map((msg: any) => ({
+        messages: session.messages.map((msg) => ({
           ...msg,
           timestamp: new Date(msg.timestamp)
         }))
@@ -206,11 +219,24 @@ export class MemoryManager {
         throw new Error('Invalid data format');
       }
 
-      const sessions = importedSessions.map((session: any) => ({
+      const sessions = importedSessions.map((session: {
+        id: string;
+        title: string;
+        createdAt: string | Date;
+        updatedAt: string | Date;
+        messages: Array<{
+          id: string;
+          role: string;
+          content: string;
+          timestamp: string | Date;
+          provider?: string;
+          model?: string;
+        }>;
+      }) => ({
         ...session,
         createdAt: new Date(session.createdAt),
         updatedAt: new Date(session.updatedAt),
-        messages: session.messages.map((msg: any) => ({
+        messages: session.messages.map((msg) => ({
           ...msg,
           timestamp: new Date(msg.timestamp)
         }))

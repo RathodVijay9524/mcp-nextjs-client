@@ -1,5 +1,5 @@
 // This file will run on the server side only
-import { spawn, ChildProcess } from 'child_process';
+import { ChildProcess } from 'child_process';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 
@@ -99,7 +99,7 @@ export class ServerSideMCPManager {
     this.servers.delete(serverId);
   }
 
-  async listTools(serverId: string): Promise<any[]> {
+  async listTools(serverId: string): Promise<unknown[]> {
     const server = this.servers.get(serverId);
     if (!server || !server.client || !server.isConnected) {
       throw new Error('Server not found or not connected');
@@ -114,7 +114,7 @@ export class ServerSideMCPManager {
     }
   }
 
-  async callTool(serverId: string, toolName: string, args: Record<string, any>): Promise<any> {
+  async callTool(serverId: string, toolName: string, args: Record<string, unknown>): Promise<unknown> {
     const server = this.servers.get(serverId);
     if (!server || !server.client || !server.isConnected) {
       throw new Error('Server not found or not connected');
@@ -132,7 +132,7 @@ export class ServerSideMCPManager {
     }
   }
 
-  async listResources(serverId: string): Promise<any[]> {
+  async listResources(serverId: string): Promise<unknown[]> {
     const server = this.servers.get(serverId);
     if (!server || !server.client || !server.isConnected) {
       throw new Error('Server not found or not connected');
@@ -160,7 +160,7 @@ export class ServerSideMCPManager {
     }));
   }
 
-  async getAllTools(): Promise<Array<{ serverId: string; tools: any[] }>> {
+  async getAllTools(): Promise<Array<{ serverId: string; tools: unknown[] }>> {
     const results = [];
     
     for (const [serverId, server] of this.servers) {

@@ -59,7 +59,7 @@ export class MCPClient {
       }
 
       const data = await response.json();
-      return data.tools.map((tool: any) => ({
+      return data.tools.map((tool: { name: string; description?: string; inputSchema?: unknown }) => ({
         name: tool.name,
         description: tool.description || '',
         inputSchema: tool.inputSchema
@@ -70,7 +70,7 @@ export class MCPClient {
     }
   }
 
-  async callTool(name: string, arguments_: Record<string, any>): Promise<any> {
+  async callTool(name: string, arguments_: Record<string, unknown>): Promise<unknown> {
     try {
       const response = await fetch('/api/mcp/tools', {
         method: 'POST',
@@ -102,7 +102,7 @@ export class MCPClient {
     return [];
   }
 
-  async readResource(uri: string): Promise<string> {
+  async readResource(_uri: string): Promise<string> {
     // For now, return empty string - resources can be implemented similarly to tools
     return '';
   }

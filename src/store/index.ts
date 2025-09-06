@@ -161,7 +161,7 @@ export const useAppStore = create<AppState>()(
       
       // Message Actions
       sendMessage: async (content: string, useTools: boolean = false) => {
-        const { currentSession, llmManager, mcpClientManager, isLLMConfigured, createNewSession } = get();
+        const { currentSession, llmManager, isLLMConfigured, createNewSession } = get();
         
         // Auto-create session if none exists
         let activeSession = currentSession;
@@ -183,7 +183,7 @@ export const useAppStore = create<AppState>()(
           set({ isLoading: true, error: null });
           
           // Add user message
-          const userMessage = memoryManager.addMessage(activeSession.id, {
+          memoryManager.addMessage(activeSession.id, {
             role: 'user',
             content,
             provider: llmManager.getCurrentConfig()?.provider,
@@ -279,7 +279,7 @@ Remember: Your power comes from using MCP tools to provide real, accurate, and d
           );
           
           // Add assistant message
-          const assistantMessage = memoryManager.addMessage(activeSession.id, {
+          memoryManager.addMessage(activeSession.id, {
             role: 'assistant',
             content: assistantResponse,
             provider: llmManager.getCurrentConfig()?.provider,

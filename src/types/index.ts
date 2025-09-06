@@ -44,7 +44,7 @@ export interface MCPServerConfig {
 export interface MCPTool {
   name: string;
   description: string;
-  inputSchema: Record<string, any>;
+  inputSchema: Record<string, unknown>;
 }
 
 export interface MCPResource {
