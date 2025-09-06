@@ -333,7 +333,7 @@ const MCPServerSection: React.FC<{ colors?: Colors }> = ({ colors }) => {
                 Arguments (one per line)
               </label>
               <textarea
-                value={newServer.args.join('\n')}
+                value={(newServer.args || []).join('\n')}
                 onChange={(e) => setNewServer(prev => ({ 
                   ...prev, 
                   args: e.target.value.split('\n').filter(arg => arg.trim()) 
@@ -386,7 +386,7 @@ const MCPServerSection: React.FC<{ colors?: Colors }> = ({ colors }) => {
                   </span>
                 </div>
                 <p className="text-sm text-gray-600">
-                  {server.command} {server.args.join(' ')}
+                  {server.command} {(server.args || []).join(' ')}
                 </p>
               </div>
               
